@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "django_htmx",
     # my app
     # "accounts.apps.AccountsConfig",
+    "todo.apps.TodoConfig",
 ]
 
 MIDDLEWARE = [
