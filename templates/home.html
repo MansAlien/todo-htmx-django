@@ -1,35 +1,66 @@
 {% extends "base.html" %}
 
-<div class="todo-container">
+{% block content %}
+<script>
+  // Function to restrict input to alphanumeric characters
+  function restrictInput(event) {
+    const regex = /[a-zA-Z0-9]/;
+    const inputChar = String.fromCharCode(event.keyCode);
+    if (!regex.test(inputChar)) {
+      event.preventDefault();
+    }
+  }
+</script>
+<div id="todo-container" style="width: 400px;">
   <div class="todo-search">
-    <form action="" method="POST">
+    <form class="input-group mb-3" action="" 
+       hx-post="{% url 'create' %}"
+       hx-trigger="submit"
+       hx-target="#todo-container"
+       hx-swap="outerHTML"
+      >
       {% csrf_token %}
-      <input type="text" placeholder="Enter Todo" /> 
-      <button>Add</button>
+      <input class="form-control border-black me-2 flex-grow-1 rounded-start bg-dark border-secondary" type="text" 
+        placeholder="New Task" aria-describedby="button-addon2" name="task" required 
+        onkeypress="restrictInput(event)"> 
+      <button class="btn btn-success " type="submit" id="button-addon2">Add</button>
     </form>
   </div>
 
-  <div class="todo-list">
+
+  <div class="list-group  d-flex flex-column  mt-2 border-0 rounded-3 bg-dark border-secondary">
     {% for task in task_list %}
-    <div class="todo-list-item">
-      <div class="task">
-        <input type="checkbox" />
-        <p>{{task.title}}</p>
+    <div id="{{task.title}}{{task.id}}" class="list-group-item d-flex justify-content-center align-items-center 
+        justify-content-between rounded-3 text-white text-opacity-75 bg-dark border-secondary">
+      <div class="task d-flex align-items-center justify-content-between me-5 rounded-3 border-secondary bg-dark" style="width: 70% ;">
+        <input class="form-check-input me-2 bg-dark border-secondary" id="{{task.id}}"  type="checkbox"
+          {% if task.completed %}
+            checked
+          {% endif %}
+        />
+        <label class="form-check-label p-0 m-0 flex-grow-1" for="{{task.id}}">{{task.title}}</label>
       </div>
 
-      <div class="btn-container">
-        <div class="edit">
-          <a >
-            <i class="fa-solid fa-pen-to-square"></i>
-          </a>
+      <div class="btn-container d-flex align-items-center justify-content-between" style="width: 20% ;">
+        <div
+            hx-get="{% url "rename" task.id %}"
+            hx-trigger="click"
+            hx-target="#{{task.title}}{{task.id}}"
+            hx-swap="outerHTML"
+          class="edit" id="edit_div">
+          <i class="fa-solid fa-pen-to-square" style="color: #74C0FC; cursor: pointer;"></i>
         </div>
         
-        <div class="del">
-          <a >
-            <i class="fa-solid fa-trash-can"></i>
-          </a>
+        <div
+            hx-get="{% url "delete" task.id %}"
+            hx-trigger="click"
+            hx-target="#todo-container"
+            hx-swap="outerHTML"
+            hx-confirm="Delete '{{task.title}}'?"
+          class="del">
+            <i class="fa-solid fa-trash-can" style="color: #f66151; cursor: pointer;"></i>
         </div>
       </div>
     </div>
-      
-    {% endfor %}
+{% endfor %}
+{% endblock content %}
